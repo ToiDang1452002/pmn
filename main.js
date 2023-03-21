@@ -28,6 +28,9 @@ let _sodai = core["laysodai"](_dai);
 let kieudanh = core["laykieudanh"](_kieudanh);
 let sotien = core["laysotien"](_kieudanh);
 console.log("tien xac", core["tinhtoan"](_sodai, _number, kieudanh, sotien));
+btn_tintoan.addEventListener("click", () => {
+  alert(`tien xac: ${core["tinhtoan"](_sodai, _number, kieudanh, sotien)}`);
+});
 
 // let a = "0003den9003";
 
