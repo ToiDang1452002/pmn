@@ -24,23 +24,79 @@ const daoChuoi = (str) => {
   }
   return str_dao;
 };
+
+const daudui = (str) => {
+  str = str.replaceAll("n", "").replaceAll(",", ".");
+  var kieu_dau = "";
+  var kieu_dui = "";
+  var array_daudui = [];
+  var sotien_dau = 0;
+  var sotien_dui = 0;
+  var check_number_kieudanh;
+  var check_number_sotien;
+  for (let i = 0; i < str.length; i++) {
+    if (!isNaN(str[i])) {
+      if (check_number_kieudanh != null) {
+        if (str.slice(0, i - 1) == "dau" || str.slice(0, i - 1) == "d") {
+          kieu_dau = str.slice(0, i - 1);
+        }
+        if (i - check_number_kieudanh > 1) {
+          if (
+            str.slice(check_number_kieudanh + 1, i) == "dui" ||
+            str.slice(check_number_kieudanh + 1, i) == "duoi" ||
+            str.slice(check_number_kieudanh + 1, i) == "d"
+          ) {
+            kieu_dui = str.slice(check_number_kieudanh + 1, i);
+          }
+        }
+      } else {
+        if (str.slice(0, i) == "dau" || str.slice(0, i) == "d") {
+          kieu_dau = str.slice(0, i);
+        }
+      }
+      check_number_kieudanh = i;
+    } else {
+      if (str[i] != ".") {
+        if (check_number_sotien != null) {
+          if (i - check_number_sotien > 1) {
+            sotien_dau = str.slice(check_number_sotien + 1, i);
+          }
+        }
+        check_number_sotien = i;
+      }
+    }
+  }
+  sotien_dui = str.slice(check_number_sotien + 1);
+  if (kieu_dau == "d" && kieu_dui == "d") {
+    kieu_dau = "dau";
+    kieu_dui = "duoi";
+  }
+  if (kieu_dau == "dau" && (kieu_dui == "dui" || kieu_dui == "duoi")) {
+    array_daudui.push(kieu_dau, sotien_dau, kieu_dui, sotien_dui);
+  }
+  return array_daudui;
+};
 const laykieudanh = (str) => {
   let dao_chuoi = daoChuoi(str);
   let kieudanh = "";
   let check = false;
-  for (let i = 0; i < dao_chuoi.length; i++) {
-    if (isNaN(dao_chuoi[i])) {
-      if (dao_chuoi[i] != "n" && dao_chuoi[i] != ",") {
-        kieudanh += dao_chuoi[i];
-        check = true;
-      }
-    } else {
-      if (check == true) {
-        kieudanh += dao_chuoi[i];
+  if (daudui(str).length == 4) {
+    return daudui(str);
+  } else {
+    for (let i = 0; i < dao_chuoi.length; i++) {
+      if (isNaN(dao_chuoi[i])) {
+        if (dao_chuoi[i] != "n" && dao_chuoi[i] != ",") {
+          kieudanh += dao_chuoi[i];
+          check = true;
+        }
+      } else {
+        if (check == true) {
+          kieudanh += dao_chuoi[i];
+        }
       }
     }
+    return daoChuoi(kieudanh);
   }
-  return daoChuoi(kieudanh);
 };
 const laySoTien = (str) => {
   let dao_chuoi = daoChuoi(str);
@@ -175,7 +231,7 @@ const tinhtoan = (sodai, array_number, kieudanh, sotien) => {
             tienxac += Number(sodai * 16 * sotien);
           }
         } else {
-          if (keo_den(so)[0].length == 2) {
+          if (keo_den(so)[0].toString().length == 2) {
             tienxac += sodai * keo_den(so).length * 18 * sotien;
           } else {
             tienxac += sodai * keo_den(so).length * 17 * sotien;
@@ -298,7 +354,7 @@ const tinhtoan = (sodai, array_number, kieudanh, sotien) => {
             tienxac += sodai * array_dao_4_con.length * 16 * sotien;
           }
         } else {
-          if (keo_den(so)[0].length == 3) {
+          if (keo_den(so)[0].toString().length == 3) {
             for (let i = 0; i < keo_den(so).length; i++) {
               tienxac += sodai * dao_3_con(keo_den(so)[i]).length * 17 * sotien;
             }
@@ -347,6 +403,15 @@ const tinhtoan = (sodai, array_number, kieudanh, sotien) => {
         }
       });
       break;
+  }
+  if (typeof kieudanh !== "string") {
+    array_number.forEach((so) => {
+      if (!isNaN(so)) {
+        tienxac += sodai * (parseFloat(kieudanh[1]) + parseFloat(kieudanh[3]));
+      } else {
+        tienxac += sodai * keo_den(so).length * (parseFloat(kieudanh[1]) + parseFloat(kieudanh[3]));
+      }
+    });
   }
   return Math.round(tienxac);
 };
