@@ -24,7 +24,68 @@ const daoChuoi = (str) => {
   }
   return str_dao;
 };
+const laySoDanh = (str, str_kieudanh) => {
+  let array = str.split(".");
+  let result = [];
+  let array_so_da = [];
+  array.shift();
+  array.pop();
+  array.forEach((item) => {
+    if (!isNaN(item)) {
+      // result.push(item);
+      if (
+        str_kieudanh == "db" ||
+        str_kieudanh == "dxc" ||
+        str_kieudanh == "db7l"
+      ) {
+        if (item.length == 3) {
+          dao_3_con(item).forEach((soDao) => {
+            result.push(soDao);
+          });
+        } else {
+          dao_4_con(item).forEach((soDao) => {
+            result.push(soDao);
+          });
+        }
+      } else {
+        result.push(item);
+      }
+    } else {
+      keo_den(item).forEach((sokeo) => {
+        if (
+          str_kieudanh == "db" ||
+          str_kieudanh == "dxc" ||
+          str_kieudanh == "db7l"
+        ) {
+          if (sokeo.toString().length == 3) {
+            dao_3_con(sokeo.toString()).forEach((soDao) => {
+              result.push(soDao);
+            });
+          } else {
+            dao_4_con(sokeo.toString()).forEach((soDao) => {
+              result.push(soDao);
+            });
+          }
+        } else {
+          result.push(sokeo);
+        }
+      });
+    }
+  });
 
+  if (str_kieudanh == "da" || str_kieudanh == "dx") {
+    for (let i = 0; i < result.length; i++) {
+      for (let j = i + 1; j < result.length; j++) {
+        array_so_da.push(result[i] + "." + result[j]);
+      }
+    }
+  }
+  if (array_so_da != "") {
+    result = array_so_da;
+  }
+  console.log(result);
+  return result;
+};
 const daudui = (str) => {
   str = str.replaceAll("n", "").replaceAll(",", ".");
   var kieu_dau = "";
@@ -59,26 +120,32 @@ const daudui = (str) => {
       if (str[i] != ".") {
         if (check_number_sotien != null) {
           if (i - check_number_sotien > 1) {
-            sotien_dau = str.slice(check_number_sotien + 1, i);
+            sotien_dau = str
+              .slice(check_number_sotien + 1, i)
+              .replaceAll(".", ",");
           }
         }
         check_number_sotien = i;
       }
     }
   }
-  sotien_dui = str.slice(check_number_sotien + 1);
+
+  sotien_dui = str.slice(check_number_sotien + 1).replaceAll(".", ",");
   if (kieu_dau == "d" && kieu_dui == "d") {
     kieu_dau = "dau";
     kieu_dui = "duoi";
   }
   if (kieu_dau == "dau" && (kieu_dui == "dui" || kieu_dui == "duoi")) {
-    array_daudui.push(kieu_dau, sotien_dau, kieu_dui, sotien_dui);
+    array_daudui.push(kieu_dau + sotien_dau, kieu_dui + sotien_dui);
   }
+
   return array_daudui;
 };
 const laykieudanh = (str) => {
-  let dao_chuoi = daoChuoi(str);
+  let array = str.split(".");
+  let dao_chuoi = daoChuoi(array.pop());
   let kieudanh = "";
+  let result = "";
   let check = false;
   if (daudui(str).length == 4) {
     return daudui(str);
@@ -95,7 +162,8 @@ const laykieudanh = (str) => {
         }
       }
     }
-    return daoChuoi(kieudanh);
+    result = daoChuoi(kieudanh);
+    return result;
   }
 };
 const laySoTien = (str) => {
@@ -115,6 +183,7 @@ const laySoTien = (str) => {
       }
     }
   }
+
   return daoChuoi(sotien);
 };
 const laySocon = (array) => {
@@ -138,7 +207,39 @@ const dao_3_con = (_number) => {
   array_dao.push(_number[2] + _number[1] + _number[0]);
   return [...new Set(array_dao)];
 };
+const nhanVe = (
+  soDanh,
+  soDai,
+  soTien,
+  nhan2s,
+  nhan3s,
+  nhan4s,
+  nhandt,
+  nhandx
+) => {
+  var result = 0;
+  if (soDanh.length < 5) {
+    switch (soDanh.length) {
+      case 2:
+        result = (nhan2s / 100) * soTien;
+        break;
+      case 3:
+        result = (nhan3s / 100) * soTien;
+        break;
+      case 4:
+        result = (nhan4s / 100) * soTien;
+        break;
+    }
+  } else {
+    if (soDai > 1) {
+      result = (nhandx / 100) * soTien;
+    } else {
+      result = (nhandt / 100) * soTien;
+    }
+  }
 
+  return Math.floor(result);
+};
 const dao_4_con = (_number) => {
   let array_dao = [];
   array_dao.push(_number[0] + _number[1] + _number[2] + _number[3]);
@@ -215,209 +316,203 @@ const keo_den = (str_number) => {
   }
   return array_keo;
 };
-const tinhtoan = (sodai, array_number, kieudanh, sotien) => {
+const tach_tin_lan_1 = (str, ma_dai) => {
+  let array_tin_goc = str.split(".");
+  let number_arr_dai = [];
+  let check_number = 0;
+  let result = [];
+  let a = 0;
+  array_tin_goc.forEach((tin, index) => {
+    ma_dai.forEach((dai) => {
+      if (tin == dai) {
+        if (index - check_number > 1) {
+          number_arr_dai.push(index);
+        }
+
+        check_number = index;
+      }
+    });
+  });
+  number_arr_dai.forEach((number) => {
+    a = number - a;
+    result.push(array_tin_goc.splice(0, a).join("."));
+    a = number;
+  });
+  result.push(array_tin_goc.join("."));
+  return result;
+};
+const tach_tin_lan_2 = (str, ma_dai) => {
+  let array_tin_goc = str.split(".");
+  let check_number = "";
+  let array_check_number = [];
+  let array_dai = [];
+  let array_tin_cat = [];
+  let _danhdau = 0;
+
+  array_tin_goc.forEach((tin) => {
+    ma_dai.forEach((dai) => {
+      if (dai == tin) {
+        array_dai.push(dai);
+      }
+    });
+  });
+
+  array_tin_goc.splice(0, array_dai.length);
+  array_tin_goc.forEach((tin, index) => {
+    if (!isNaN(tin[0])) {
+      if (index - check_number > 1) {
+        array_check_number.push(index);
+      }
+      check_number = index;
+    }
+  });
+
+  array_check_number.forEach((number) => {
+    _danhdau = number - _danhdau;
+    array_tin_cat.push(
+      array_dai.join(".") + "." + array_tin_goc.splice(0, _danhdau).join(".")
+    );
+    _danhdau = number;
+  });
+
+  array_tin_cat.push(array_dai.join(".") + "." + array_tin_goc.join("."));
+  return array_tin_cat;
+};
+const tach_tin_last = (str, ma_dai) => {
+  let array_tin_goc = str.split(".");
+
+  let check_dai = "";
+  let array_kieudanh = [];
+  let array_result = [];
+  array_tin_goc.forEach((item, index) => {
+    if (isNaN(item) && isNaN(item[0])) {
+      ma_dai.forEach((dai) => {
+        if (dai == item) {
+          check_dai = index;
+        }
+      });
+      if (index != check_dai) {
+        array_kieudanh.push(item);
+      }
+    }
+  });
+  array_kieudanh.forEach((item, index) => {
+    array_tin_goc.splice(-1, 1);
+    let a = 1;
+    if (daudui(item) != "") {
+      daudui(item).forEach((dd) => {
+        array_kieudanh.splice(index, a, dd);
+        a = 0;
+        index = index + 1;
+      });
+    }
+  });
+
+  array_kieudanh.forEach((item) => {
+    array_result.push(array_tin_goc.join(".") + "." + item);
+  });
+  // console.log(array_result);
+  return array_result;
+};
+const tinhtoan = (sodai, soDanh, kieudanh, sotien) => {
   let tienxac = 0;
+
   switch (kieudanh) {
     case "b":
     case "bao":
+    // case "bl":
     case "lo":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 2) {
-            tienxac += Number(sodai * 18 * sotien);
-          } else if (so.length == 3) {
-            tienxac += Number(sodai * 17 * sotien);
-          } else if (so.length == 4) {
-            tienxac += Number(sodai * 16 * sotien);
-          }
-        } else {
-          if (keo_den(so)[0].toString().length == 2) {
-            tienxac += sodai * keo_den(so).length * 18 * sotien;
-          } else {
-            tienxac += sodai * keo_den(so).length * 17 * sotien;
-          }
-        }
-      });
+      if (soDanh.length == 2) {
+        tienxac = sodai * 18 * sotien;
+      } else if (soDanh.length == 3) {
+        tienxac = sodai * 17 * sotien;
+      } else if (soDanh.length == 4) {
+        tienxac = sodai * 16 * sotien;
+      }
+
       break;
     case "x":
     case "xc":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 3) {
-            tienxac += sodai * 2 * sotien;
-          }
-        } else {
-          tienxac += sodai * keo_den(so).length * 2 * sotien;
-        }
-      });
+      tienxac += sodai * 2 * sotien;
       break;
     case "dd":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 2) {
-            tienxac += sodai * 2 * sotien;
-          }
-        } else {
-          tienxac += sodai * keo_den(so).length * 2 * sotien;
-        }
-      });
+      tienxac += sodai * 2 * sotien;
       break;
     case "dau":
+      tienxac += sodai * sotien;
+      break;
+    case "duoi":
     case "dui":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 2) {
-            tienxac += sodai * sotien;
-          }
-        } else {
-          tienxac += sodai * keo_den(so).length * sotien;
-        }
-      });
+      tienxac += sodai * sotien;
       break;
     case "da":
-      let socap = 0;
-      for (let i = 0; i < array_number.length; i++) {
-        socap += i;
-      }
       if (sodai == 1) {
-        tienxac = 36 * socap * sotien;
+        tienxac = 36 * sotien;
       } else if (sodai == 2) {
-        tienxac = 72 * socap * sotien;
+        tienxac = 72 * sotien;
       } else if (sodai == 3) {
-        tienxac = 72 * socap * sotien * 3;
+        tienxac = 72 * sotien * 3;
       } else {
-        tienxac = 72 * socap * sotien * 6;
+        tienxac = 72 * sotien * 6;
       }
       break;
     case "dx":
       if (sodai > 1) {
-        let socap = 0;
-        for (let i = 0; i < array_number.length; i++) {
-          socap += i;
-        }
         if (sodai == 2) {
-          tienxac = 72 * socap * sotien;
+          tienxac = 72 * sotien;
         } else if (sodai == 3) {
-          tienxac = 72 * socap * sotien * 3;
+          tienxac = 72 * sotien * 3;
         } else {
-          tienxac = 72 * socap * sotien * 6;
+          tienxac = 72 * sotien * 6;
         }
       }
       break;
-    case "dt":
-      let socap_dt = 0;
-      for (let i = 0; i < array_number.length; i++) {
-        socap_dt += i;
-      }
-      if (sodai == 1) {
-        tienxac = 18 * socap_dt * sotien;
-      } else {
-        tienxac = sodai * 36 * socap_dt * sotien;
-      }
-      break;
+    // case "dt":
+    //   if (sodai == 1) {
+    //     tienxac = 18 * sotien;
+    //   } else {
+    //     tienxac = sodai * 36 * sotien;
+    //   }
+    //   break;
     case "b6l":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          tienxac += sodai * 6 * sotien;
-        } else {
-          tienxac += sodai * keo_den(so).length * 6 * sotien;
-        }
-      });
+      tienxac += sodai * 6 * sotien;
       break;
-      break;
+
     case "b7l":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          tienxac += sodai * 7 * sotien;
-        } else {
-          tienxac += sodai * keo_den(so).length * 7 * sotien;
-        }
-      });
+      tienxac += sodai * 7 * sotien;
       break;
     case "b8l":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          tienxac += sodai * 8 * sotien;
-        } else {
-          tienxac += sodai * keo_den(so).length * 8 * sotien;
-        }
-      });
-      break;
-    case "db":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 3) {
-            var array_dao_3_con = dao_3_con(so);
-            tienxac += sodai * array_dao_3_con.length * 17 * sotien;
-          } else if (so.length == 4) {
-            var array_dao_4_con = dao_4_con(so);
-            tienxac += sodai * array_dao_4_con.length * 16 * sotien;
-          }
-        } else {
-          if (keo_den(so)[0].toString().length == 3) {
-            for (let i = 0; i < keo_den(so).length; i++) {
-              tienxac += sodai * dao_3_con(keo_den(so)[i]).length * 17 * sotien;
-            }
-          } else {
-            for (let i = 0; i < keo_den(so).length; i++) {
-              tienxac += sodai * dao_4_con(keo_den(so)[i]).length * 16 * sotien;
-            }
-          }
-        }
-      });
-      break;
-    case "dxc":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 3) {
-            var array_dao_3_con = dao_3_con(so);
-            tienxac += sodai * array_dao_3_con.length * 2 * sotien;
-          }
-        } else {
-          for (let i = 0; i < keo_den(so).length; i++) {
-            tienxac += sodai * dao_3_con(keo_den(so)[i]).length * 2 * sotien;
-          }
-        }
-      });
-      break;
-    case "db7l":
-      array_number.forEach((so) => {
-        if (!isNaN(so)) {
-          if (so.length == 3) {
-            var array_dao_3_con = dao_3_con(so);
-            tienxac += sodai * array_dao_3_con.length * 7 * sotien;
-          } else if (so.length == 4) {
-            var array_dao_4_con = dao_4_con(so);
-            tienxac += sodai * array_dao_4_con.length * 7 * sotien;
-          }
-        } else {
-          if (keo_den(so)[0].length == 3) {
-            for (let i = 0; i < keo_den(so).length; i++) {
-              tienxac += sodai * dao_3_con(keo_den(so)[i]).length * 7 * sotien;
-            }
-          } else {
-            for (let i = 0; i < keo_den(so).length; i++) {
-              tienxac += sodai * dao_4_con(keo_den(so)[i]).length * 7 * sotien;
-            }
-          }
-        }
-      });
+      tienxac += sodai * 8 * sotien;
       break;
   }
-  if (typeof kieudanh !== "string") {
-    array_number.forEach((so) => {
-      if (!isNaN(so)) {
-        tienxac += sodai * (parseFloat(kieudanh[1]) + parseFloat(kieudanh[3]));
-      } else {
-        tienxac += sodai * keo_den(so).length * (parseFloat(kieudanh[1]) + parseFloat(kieudanh[3]));
-      }
-    });
-  }
+
   return Math.round(tienxac);
 };
 
-var key = ["laysodai", "laykieudanh", "laysotien", "laysocon", "tinhtoan"];
-var value = [laysodai, laykieudanh, laySoTien, laySocon, tinhtoan];
+var key = [
+  "laysodai",
+  "laykieudanh",
+  "laySoDanh",
+  "laysotien",
+  "laysocon",
+  "tinhtoan",
+  "tachtinlast",
+  "tach_tin_lan_2",
+  "tach_tin_lan_1",
+  "nhanVe",
+];
+var value = [
+  laysodai,
+  laykieudanh,
+  laySoDanh,
+  laySoTien,
+  laySocon,
+  tinhtoan,
+  tach_tin_last,
+  tach_tin_lan_2,
+  tach_tin_lan_1,
+  nhanVe,
+];
 
 //ép key
 var ex = value.reduce((acc, value, i) => {
