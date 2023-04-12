@@ -1,84 +1,128 @@
 import core from "./core.js";
-
 const btn_tintoan = document.getElementById("btn_tinhtoan");
-const ma_dai = ["2d", "3d", "4d", "tp", "la", "bp"];
-document.getElementById("txt_data").value = "2d.12den25.b5";
-var tinnhan = document.getElementById("txt_data").value;
-var array_tin = tinnhan.split(".");
+const dai = ["2d", "3d", "4d"];
+const ten_dai = ["bt", "vt", "bl"];
+const ma_dai = dai.concat(ten_dai);
 
-var _dai = [];
-var _kieudanh = array_tin.pop();
-var _number = [];
+btn_tintoan.addEventListener("click", () => {
+  var str = document.getElementById("txt_data").value;
 
-array_tin.forEach((tin) => {
-  ma_dai.forEach((dai) => {
-    if (dai == tin) {
-      _dai.push(tin);
-    }
-  });
-});
-array_tin.splice(0, _dai.length);
-_number = array_tin;
+  var nhan2s = document
+    .getElementById("gia_2s")
+    .getElementsByTagName("td")[2].innerText;
+  var nhan3s = document
+    .getElementById("gia_3s")
+    .getElementsByTagName("td")[2].innerText;
+  var nhan4s = document
+    .getElementById("gia_4s")
+    .getElementsByTagName("td")[2].innerText;
+  var nhandt = document
+    .getElementById("gia_dt")
+    .getElementsByTagName("td")[2].innerText;
+  var nhandx = document
+    .getElementById("gia_dx")
+    .getElementsByTagName("td")[2].innerText;
 
-console.log(`So dai: ${core["laysodai"](_dai)}`);
-console.log(`kieu danh: ${core["laykieudanh"](_kieudanh)}`);
-console.log(`so tien: ${core["laysotien"](_kieudanh)}`);
-console.log(`so con: ${core["laysocon"](_number)}`);
-let _sodai = core["laysodai"](_dai);
-let kieudanh = core["laykieudanh"](_kieudanh);
-let sotien = core["laysotien"](_kieudanh);
-console.log("tien xac", core["tinhtoan"](_sodai, _number, kieudanh, sotien));
-// btn_tintoan.addEventListener("click", () => {
-//   alert(`tien xac: ${core["tinhtoan"](_sodai, _number, kieudanh, sotien)}`);
-// });
-
-let str = "tp.la.231keo931.b5.xc5";
-let array_tin_goc = str.split(".");
-let check_dai = "";
-let array_kieudanh = [];
-let array_result = [];
-array_tin_goc.forEach((item, index) => {
-  if (isNaN(item) && isNaN(item[0])) {
-    ma_dai.forEach((dai) => {
-      if (dai == item) {
-        check_dai = index;
-      }
+  const array_tin = [];
+  document.getElementById("data-table").innerHTML = "";
+  // var str = "tv.10den15.b5";
+  document.getElementById("txt_data").value = str;
+  let tach_lan_1 = core["tach_tin_lan_1"](str, ma_dai);
+  let tach_lan_2 = core["tach_tin_lan_2"];
+  let tach_lan_3 = core["tachtinlast"];
+  tach_lan_1.forEach((item1) => {
+    tach_lan_2(item1, ma_dai).forEach((item2) => {
+      tach_lan_3(item2, ma_dai).forEach((item3) => {
+        array_tin.push(item3);
+      });
     });
-    if (index != check_dai) {
-      array_kieudanh.push(item);
-    }
-  }
-});
+  });
+  ///////////////////////////////////////////////////////
+  var table = document
+    .getElementById("table_chitiet")
+    .getElementsByTagName("tbody")[0];
 
-array_kieudanh.forEach(() => {
-  array_tin_goc.splice(-1, 1);
-});
-
-array_kieudanh.forEach((item) => {
-  array_result.push(array_tin_goc.join(".") + "." + item);
-});
-
-console.log(array_result);
-
-array_result.forEach((item) => {
-  // console.log(item);
-  var array_tin = item.split(".");
-
-  var _dai = [];
-  var _kieudanh = array_tin.pop();
-  var _number = [];
-
+  var stt = 1;
+  var tongXac = 0;
+  var tongthanhTien = 0;
+  var tongNhanve = 0;
   array_tin.forEach((tin) => {
+    var array_dai = [];
+    let kieuDanh = core["laykieudanh"](tin);
+    let soTien = core["laysotien"](tin);
+    switch (kieuDanh) {
+      case "db":
+        kieuDanh = "b";
+        break;
+      case "dxc":
+        kieuDanh = "xc";
+        break;
+      case "db7l":
+        kieuDanh = "b7l";
+        break;
+      case "x":
+        kieuDanh = "xc";
+        break;
+    }
+
+    //Lay mã đài
     ma_dai.forEach((dai) => {
-      if (dai == tin) {
-        _dai.push(tin);
-      }
+      tin.split(".").forEach((item_tin) => {
+        if (item_tin == dai) {
+          if (!isNaN(item_tin[0])) {
+            ten_dai.slice(0, item_tin[0]).forEach((a) => {
+              array_dai.push(a);
+            });
+          } else {
+            array_dai.push(item_tin);
+          }
+        }
+      });
+    });
+
+    var soDai = core["laysodai"](array_dai);
+    // console.log(core["laySoDanh"](tin, core["laykieudanh"](tin)));
+    core["laySoDanh"](tin, core["laykieudanh"](tin)).forEach((Sodanh) => {
+      var row = table.insertRow();
+      var thanhtien = core["tinhtoan"](
+        soDai,
+        Sodanh.toString(),
+        kieuDanh,
+        soTien
+      );
+      var Nhanve = core["nhanVe"](
+        Sodanh,
+        soDai,
+        thanhtien,
+        nhan2s,
+        nhan3s,
+        nhan4s,
+        nhandt,
+        nhandx
+      );
+      row.insertCell(0).innerHTML = stt++;
+      row.insertCell(1).innerHTML = array_dai.join(".");
+      row.insertCell(2).innerHTML = kieuDanh;
+      row.insertCell(3).innerHTML = Sodanh;
+      row.insertCell(4).innerHTML = soTien;
+      // console.log(core["laySoDanh"](tin, core["laykieudanh"](tin)));
+      row.insertCell(5).innerHTML =
+        thanhtien == 0 ? "Chưa tính được" : thanhtien;
+      row.insertCell(6).innerHTML = Nhanve;
+      tongNhanve += Nhanve;
+      tongthanhTien += parseInt(soTien);
+      tongXac += core["tinhtoan"](soDai, Sodanh.toString(), kieuDanh, soTien);
     });
   });
-  array_tin.splice(0, _dai.length);
-  _number = array_tin;
-  let _sodai = core["laysodai"](_dai);
-  let kieudanh = core["laykieudanh"](_kieudanh);
-  let sotien = core["laysotien"](_kieudanh);
-  console.log("tien xac", core["tinhtoan"](_sodai, _number, kieudanh, sotien));
+  document.getElementById("tong_sotien").value = tongthanhTien;
+  document.getElementById("tong_thanhtien").value = tongXac;
+  document.getElementById("tong_nhanve").value = tongNhanve;
+});
+
+document.getElementById("btn_gia").addEventListener("click", () => {
+  document.getElementsByClassName("modal")[0].style.display = "block";
+});
+
+document.getElementById("close_modal").addEventListener("click", () => {
+  document.getElementsByClassName("modal")[0].style.display = "none";
 });
