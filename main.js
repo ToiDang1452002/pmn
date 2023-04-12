@@ -116,7 +116,7 @@ btn_tintoan.addEventListener("click", () => {
   });
   document.getElementById("tong_sotien").value = tongthanhTien;
   document.getElementById("tong_thanhtien").value = tongXac;
-  document.getElementById("tong_nhanve").value = tongNhanve;
+  document.getElementById("tong_nhanve").value = tongNhanve; 
 });
 
 document.getElementById("btn_gia").addEventListener("click", () => {
